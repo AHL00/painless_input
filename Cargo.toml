@@ -4,7 +4,7 @@ description = "A simple input library with support for array input, validation, 
 license = "MIT"
 authors = ["Khant Htet Aung"]
 keywords = ["input", "validation", "array", "simple"]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 readme = "README.md"
 
