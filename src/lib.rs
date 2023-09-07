@@ -138,6 +138,8 @@ where
 
                                 error_display(error_msg.as_str(), &mut current_err_msg_len);
 
+                                input.clear();
+
                                 continue;
                             }
                         } else {
@@ -147,6 +149,8 @@ where
                             let error_msg = format!("Invalid input: '{}'; try again", input);
 
                             error_display(error_msg.as_str(), &mut current_err_msg_len);
+
+                            input.clear();
 
                             continue;
                         }
