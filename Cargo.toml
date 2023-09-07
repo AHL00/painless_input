@@ -1,5 +1,7 @@
 [package]
 name = "simple_input"
+description = "A simple input library with support for array input, validation, and pretty error messages."
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
 
