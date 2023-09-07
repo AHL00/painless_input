@@ -1,4 +1,4 @@
-use simple_input::{input, input_with_validation};
+use painless_input::{input, input_with_validation};
 
 fn main() {
     let num: u8 = input("Enter a number: ");

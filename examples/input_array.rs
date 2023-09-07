@@ -1,4 +1,4 @@
-use simple_input::{input_array, input_array_with_validation};
+use painless_input::{input_array, input_array_with_validation};
 
 fn main() {
     let arr: Vec<u8> = input_array("Enter 3 numbers: ");
