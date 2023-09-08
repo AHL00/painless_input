@@ -3,11 +3,11 @@ This is an easy to use input library crate. It automatically handles parsing err
 
 ### Error message:
 
-![Error](./images/error.png)
+![Error](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/error.png?raw=true)
 
 ### Array input:
 
-![Array](images/array.png)
+![Array](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/array.png?raw=true)
 
 ## Usage
 Normal input:
