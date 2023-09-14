@@ -3,17 +3,17 @@ This is an easy to use input library crate. It automatically handles parsing err
 
 ### Error message:
 
-![Error](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/error.png?raw=true)
+![Error](https://raw.githubusercontent.com/AHL00/painless_input/main/images/error.png?raw=true)
 
 ### Array input:
 
-![Array](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/array.png?raw=true)
+![Array](https://raw.githubusercontent.com/AHL00/painless_input/main/images/array.png?raw=true)
 
 ### Multiselect input:
-![Multiselect](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/multiselect.png?raw=true)
+![Multiselect](https://raw.githubusercontent.com/AHL00/painless_input/main/images/multiselect.png?raw=true)
 
 ### Select input:
-![Select](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/select.png?raw=true)
+![Select](https://raw.githubusercontent.com/AHL00/painless_input/main/images/select.png?raw=true)
 
 ## Usage
 ### Normal input:
