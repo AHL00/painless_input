@@ -1,4 +1,5 @@
-use std::io::Write;
+use std::fmt::Display;
+use std::io::{stdout, Write};
 
 //TODO: Fix moving when cursor is at the end of the line and the move is more than the length of the line
 //TODO: Arrow key movement
@@ -7,8 +8,8 @@ use std::io::Write;
 /// The closure should return a result which is a () if the input is valid or a string error message to be shown if the input is invalid.
 /// ## Example
 /// ```
-/// use simple_input::input_with_validation;
-/// 
+/// use painless_input::input_with_validation;
+///
 /// let input: i32 = input_with_validation("Enter a number: ", Box::new(|x: &i32| {
 ///    if *x > 10 {
 ///       Ok(())
@@ -22,9 +23,9 @@ pub fn input_with_validation<T>(
     input_str: &str,
     validation: Box<dyn Fn(&T) -> Result<(), String>>,
 ) -> T
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
 {
     input_internal(input_str, Some(validation))
 }
@@ -32,15 +33,15 @@ where
 /// Input a string from the user and parse it to the specified type.
 /// ## Example
 /// ```
-/// use simple_input::input;
-/// 
+/// use painless_input::input;
+///
 /// let input: i32 = input("Enter a number: ");
 /// println!();
 /// ```
 pub fn input<T>(input_str: &str) -> T
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
 {
     input_internal(input_str, None)
 }
@@ -49,15 +50,15 @@ where
 /// The array is inputted like this; first prints [ and then ask for input. On enter, if the input is empty, it will stop. Otherwise, it will parse and ask for another input.
 /// ## Example
 /// ```
-/// use simple_input::input_array_with_validation;
-/// 
+/// use painless_input::input_array;
+///
 /// let input: Vec<i32> = input_array("Enter numbers: ");
 /// println!();
 /// ```
 pub fn input_array<T>(input_str: &str) -> Vec<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
 {
     input_array_internal(input_str, None)
 }
@@ -66,8 +67,8 @@ where
 /// The array is inputted like this; first prints [ and then ask for input. On enter, if the input is empty, it will stop. Otherwise, it will parse and ask for another input.
 /// ## Example
 /// ```
-/// use simple_input::input_array_with_validation;
-/// 
+/// use painless_input::input_array_with_validation;
+///
 /// let input: Vec<i32> = input_array_with_validation("Enter numbers: ", Box::new(|x: &Vec<i32>| {
 ///   if x.len() > 5 {
 ///      Ok(())
@@ -81,9 +82,9 @@ pub fn input_array_with_validation<T>(
     input_str: &str,
     validation: Box<dyn Fn(&Vec<T>) -> Result<(), String>>,
 ) -> Vec<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
 {
     input_array_internal(input_str, Some(validation))
 }
@@ -92,9 +93,9 @@ fn input_internal<T>(
     input_str: &str,
     validation: Option<Box<dyn Fn(&T) -> Result<(), String>>>,
 ) -> T
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
 {
     crossterm::execute!(std::io::stdout(), crossterm::style::Print(input_str)).unwrap();
     std::io::stdout().flush().unwrap();
@@ -193,16 +194,16 @@ fn input_array_internal<T>(
     input_str: &str,
     validation: Option<Box<dyn Fn(&Vec<T>) -> Result<(), String>>>,
 ) -> Vec<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
 {
     crossterm::execute!(
         std::io::stdout(),
         crossterm::style::Print(input_str),
         crossterm::style::Print("[")
     )
-    .unwrap();
+        .unwrap();
     std::io::stdout().flush().unwrap();
 
     // Input data like this
@@ -384,18 +385,272 @@ fn error_display(error_msg: &str, error_len_var: &mut usize) {
         crossterm::style::Print(&error_msg),
         crossterm::style::Print("\x1b[0m")
     )
-    .unwrap();
+        .unwrap();
 
     // move cursor left
     crossterm::execute!(
         std::io::stdout(),
         crossterm::cursor::MoveLeft(error_msg.len() as u16)
     )
-    .unwrap();
+        .unwrap();
     // flush stdout
     std::io::stdout().flush().unwrap();
 
     *error_len_var = error_msg.len();
+}
+
+
+const UP_DOWN_ARROW: &str = "⭥";
+
+/// Select an input from the user using arrow keys.
+/// The input will look like this
+/// Choose an option: [Test]⭥
+/// Click the up and down arrows to navigate, enter to submit
+pub fn select_input<T>(input_str: &str, options: &[T]) -> usize
+    where T: Display
+{
+    // Hide cursor
+    crossterm::execute!(std::io::stdout(), crossterm::cursor::Hide).unwrap();
+
+    let mut cursor = 0;
+    let mut longest_option = 0;
+
+    for option in options {
+        let option_len = format!("{}", option).len();
+        if option_len > longest_option {
+            longest_option = option_len;
+        }
+    }
+
+    crossterm::execute!(std::io::stdout(), crossterm::style::Print(input_str), crossterm::style::Print("\x1b[1m"), crossterm::style::Print("["), crossterm::style::Print(format!("{}", options[0])), crossterm::style::Print("]"), crossterm::style::Print(UP_DOWN_ARROW), crossterm::style::Print("\x1b[0m")).unwrap();
+
+    stdout().flush().unwrap();
+
+    loop {
+        let key_event = crossterm::event::read().unwrap();
+        let mut to_update = false;
+
+        match key_event {
+            crossterm::event::Event::Key(key) => {
+                if key.kind != crossterm::event::KeyEventKind::Press {
+                    continue;
+                }
+
+                match key.code {
+                    crossterm::event::KeyCode::Enter => {
+                        break;
+                    }
+                    crossterm::event::KeyCode::Up => {
+                        if cursor > 0 {
+                            cursor -= 1;
+                        }
+
+                        to_update = true;
+                    }
+                    crossterm::event::KeyCode::Down => {
+                        if cursor < options.len() - 1 {
+                            cursor += 1;
+                        }
+
+                        to_update = true;
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+
+        if to_update {
+            // Clear line
+            crossterm::execute!(std::io::stdout(), crossterm::style::Print("\r")).unwrap();
+
+            // Print input_str
+            crossterm::execute!(std::io::stdout(), crossterm::style::Print(input_str), crossterm::style::Print("\x1b[1m"), crossterm::style::Print("[")).unwrap();
+
+            // Clear enough to get rid of everything on the right
+            // +1 for the ]
+            clear_right(longest_option as u16 + UP_DOWN_ARROW.len() as u16 + 1);
+
+            // Print the option
+            crossterm::execute!(std::io::stdout(), crossterm::style::Print(&options[cursor]), crossterm::style::Print("]"), crossterm::style::Print(UP_DOWN_ARROW), crossterm::style::Print("\x1b[0m")).unwrap();
+
+            std::io::stdout().flush().unwrap();
+        }
+    }
+
+    // Show cursor
+    crossterm::execute!(std::io::stdout(), crossterm::cursor::Show).unwrap();
+
+    cursor
+}
+
+const CONFIRM_TICK: &str = "✓";
+
+// These two must be the same length
+const SELECTED: &str = "☑";
+const UNSELECTED: &str = "☐";
+
+pub fn multiselect_input(input_str: &str, submit_str: &str, options: &[&str]) -> Vec<bool> {
+    let mut cursor = 0;
+
+    let mut selections = Vec::new();
+    selections.resize(options.len(), false);
+
+    // Hide cursor
+    crossterm::execute!(std::io::stdout(), crossterm::cursor::Hide).unwrap();
+
+    // Print input_str as bold
+    crossterm::execute!(std::io::stdout(), crossterm::style::Print("\x1b[1m"), crossterm::style::Print(input_str.trim()), crossterm::style::Print("\x1b[0m")).unwrap();
+    crossterm::execute!(std::io::stdout(), crossterm::style::Print("\n")).unwrap();
+
+    let mut lines: Vec<String> = Vec::new();
+
+    for option in options {
+        lines.push(format!("{} {}", UNSELECTED, option));
+    }
+
+    // Move cursor to the first char
+    crossterm::execute!(std::io::stdout(), crossterm::style::Print("\r")).unwrap();
+
+    stdout().flush().unwrap();
+
+    let mut first_iter = true;
+
+    loop {
+        let mut update = false;
+
+        // If on the first iter, just print and don't wait for input
+        if first_iter {
+            first_iter = false;
+            update = true;
+        } else {
+            let key_event = crossterm::event::read().unwrap();
+
+            match key_event {
+                crossterm::event::Event::Key(key) => {
+                    if key.kind != crossterm::event::KeyEventKind::Press {
+                        match key.code {
+                            crossterm::event::KeyCode::Enter => {
+                                // If at the submit button
+                                if cursor >= options.len() {
+                                    break;
+                                }
+                                // If at an option
+                                else {
+                                    selections[cursor] = !selections[cursor];
+
+                                    lines[cursor] = if selections[cursor] {
+                                        format!("{} {}", SELECTED, options[cursor])
+                                    } else {
+                                        format!("{} {}", UNSELECTED, options[cursor])
+                                    };
+
+                                    update = true;
+                                }
+                            },
+                            crossterm::event::KeyCode::Down => {
+                                // If at the submit button
+                                if cursor == options.len() {
+                                    // Move to first option
+                                    crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveUp(options.len() as u16)).unwrap();
+
+                                    cursor = 0;
+                                }
+                                // If at an option
+                                else {
+                                    // Move down
+                                    crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveDown(1)).unwrap();
+
+                                    cursor += 1;
+                                }
+
+                                update = true;
+                            },
+                            crossterm::event::KeyCode::Up => {
+                                // If at the first option
+                                if cursor == 0 {
+                                    // Move to submit button
+                                    crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveDown(options.len() as u16)).unwrap();
+
+                                    cursor = options.len();
+                                }
+                                // If at an option
+                                else {
+                                    // Move up
+                                    crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveUp(1)).unwrap();
+
+                                    cursor -= 1;
+                                }
+
+                                update = true;
+                            },
+                            _ => {}
+                        }
+                    }
+
+                }
+                _ => {}
+            }
+        }
+
+        if update {
+            // Move cursor to first option
+            // The if is required because if cursor is at 0, it will move up 1 which is not what we want
+            if cursor > 0 {
+                crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveUp(cursor as u16)).unwrap();
+            }
+
+            for (i, line) in lines.iter().enumerate() {
+                // Clear line
+                crossterm::execute!(std::io::stdout(), crossterm::style::Print("\r")).unwrap();
+
+                // Print line
+                if i == cursor {
+                    // Underline if cursor is on line
+                    crossterm::execute!(std::io::stdout(), crossterm::style::Print("\x1b[4m"), crossterm::style::Print(line), crossterm::style::Print("\x1b[0m")).unwrap();
+                } else {
+                    crossterm::execute!(std::io::stdout(), crossterm::style::Print(line)).unwrap();
+                }
+
+                // Move to next line
+                crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveDown(1)).unwrap();
+            }
+
+            // Submit button
+            if cursor == options.len() {
+                // Clear line
+                crossterm::execute!(std::io::stdout(), crossterm::style::Print("\r")).unwrap();
+
+                // Print submit button as bold and underlined
+                crossterm::execute!(std::io::stdout(), crossterm::style::Print("\x1b[1;4m"), crossterm::style::Print(format!("{} {}", CONFIRM_TICK, submit_str)), crossterm::style::Print("\x1b[0m")).unwrap();
+            } else {
+                // Clear line
+                crossterm::execute!(std::io::stdout(), crossterm::style::Print("\r")).unwrap();
+
+                // Print submit button as bold
+                crossterm::execute!(std::io::stdout(), crossterm::style::Print("\x1b[1m"), crossterm::style::Print(format!("{} {}", CONFIRM_TICK, submit_str)), crossterm::style::Print("\x1b[0m")).unwrap();
+            }
+
+            // Move cursor back to cursor line
+            let move_up_to_return = options.len() as u16 - cursor as u16;
+
+            if move_up_to_return > 0 {
+                // MoveUp still moves if it receives 0
+                crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveUp(move_up_to_return)).unwrap();
+            }
+
+            // Carriage return
+            crossterm::execute!(std::io::stdout(), crossterm::style::Print("\r")).unwrap();
+
+            // Flush stdout
+            std::io::stdout().flush().unwrap();
+        }
+    }
+
+    // Show cursor
+    crossterm::execute!(std::io::stdout(), crossterm::cursor::Show).unwrap();
+
+    selections
 }
 
 fn clear_left(chars: u16) {

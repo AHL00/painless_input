@@ -9,6 +9,12 @@ This is an easy to use input library crate. It automatically handles parsing err
 
 ![Array](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/array.png?raw=true)
 
+### Multiselect input:
+![Multiselect](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/multiselect.png?raw=true)
+
+### Select input:
+![Select](https://github.com/AHL00/painless_input/blob/2acb576b38d8b20d181f3431072530ed3c20fb7b/images/select.png?raw=true)
+
 ## Usage
 ### Normal input:
 ```rust
@@ -32,7 +38,7 @@ fn main() {
 
 ### Data validation:
 ```rust
-use painless_input::input;
+use painless_input::input_with_validation;
 
 fn main() {
     let validated_num = input_with_validation::<u8>("Enter a number between 0 and 10: ", Box::new(|value| {
